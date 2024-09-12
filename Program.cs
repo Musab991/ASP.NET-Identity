@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using ASP_NET_Identity.Models;
+using ASP.NET_Identity.Models;
+using ASP.NET_Identity.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
@@ -9,15 +10,35 @@ builder.Services.AddControllersWithViews();
 var connectionString = builder.Configuration.GetConnectionString("SQLServerIdentityConnection") ?? throw new InvalidOperationException("Connection string 'SQLServerIdentityConnection' not found.");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
+
+
 //Configuration Identity Services
-builder.Services.AddIdentity<IdentityUser, IdentityRole>()
-        .AddEntityFrameworkStores<ApplicationDbContext>();
+builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(
+    options =>
+    {
+        // Password settings
+        options.Password.RequireDigit = true;
+        options.Password.RequiredLength = 8;
+        options.Password.RequireNonAlphanumeric = true;
+        options.Password.RequireUppercase = true;
+        options.Password.RequireLowercase = true;
+        options.Password.RequiredUniqueChars = 4;
+        // Other settings can be configured here
+    })
+    .AddEntityFrameworkStores<ApplicationDbContext>();
+
 
 // Configure the Application Cookie settings
 builder.Services.ConfigureApplicationCookie(options =>
 {
     // If the LoginPath isn't set, ASP.NET Core defaults the path to /Account/Login.
     options.LoginPath = "/Account/Login"; // Set your login path here
+
+    // If the AccessDenied isn't set, ASP.NET Core defaults the path to
+    // /Account/AccessDenied
+
+    options.AccessDeniedPath = "/Account/AccessDenied";//Set your access denied path...
+
 });
 
 var app = builder.Build();

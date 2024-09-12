@@ -1,8 +1,19 @@
-﻿@{
+﻿@model ASP.NET_Identity.Models.Employee
+@{
+    // Setting the title of the page to "Home Page"
     ViewData["Title"] = "Home Page";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+
+<div class="form-group">
+    <label for="Gender" class="form-label">Select Gender</label>
+    @Html.DropDownListFor(emp => emp.Gender,
+            new SelectList(Enum.GetValues(typeof(Gender))),
+            "Select Gender",
+            new { @class = "form-control" })
+
+    <label for="DepartmentID" class="form-label">Select Departments</label>
+    @Html.ListBoxFor(emp => emp.SelectedDepartmentIDs, // Note: Assuming SelectedDepartmentIDs is a List<int> in your model
+            new MultiSelectList(ViewBag.Departments, "Id", "Name"),
+            new { @class = "form-control", id = "DepartmentID" })
 </div>

@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations;
 
-namespace ASP_NET_Identity.Models
+namespace ASP.NET_Identity.Models
 {
     public class LoginViewModel
     {
@@ -14,6 +14,7 @@ namespace ASP_NET_Identity.Models
         public string Password { get; set; } = null!;
 
        public bool RememberMe { get; set; }
+
     }
 
 }

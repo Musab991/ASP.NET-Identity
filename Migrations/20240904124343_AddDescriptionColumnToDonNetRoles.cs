@@ -5,7 +5,7 @@
 namespace ASP_NET_Identity.Migrations
 {
     /// <inheritdoc />
-    public partial class UpdateIdentityUser : Migration
+    public partial class AddDescriptionColumnToDonNetRoles : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

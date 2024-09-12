@@ -1,17 +1,17 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using ASP_NET_Identity.Models;
+using ASP.NET_Identity.Models;
 
 namespace ASP_NET_Identity.Controllers
 {
     public  class AccountController : Controller
     {
-        private readonly SignInManager<IdentityUser> _signInManager;
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public AccountController(SignInManager<IdentityUser> signInManager,
-            UserManager<IdentityUser> userManger)
+        public AccountController(SignInManager<ApplicationUser> signInManager,
+            UserManager<ApplicationUser> userManger)
         {
             _signInManager = signInManager;
             _userManager = userManger;
@@ -102,27 +102,38 @@ namespace ASP_NET_Identity.Controllers
         }
 
         [HttpPost]
-        public async Task< IActionResult >Register(RegisterViewModel model)
+        [AllowAnonymous]
+        public async Task<IActionResult>Register(RegisterViewModel model)
         {
+            
             if (ModelState.IsValid)
             {
                 // Copy data from RegisterViewModel to IdentityUser
 
-                var user = new IdentityUser()
+                var user = new ApplicationUser()
                 {
                     UserName=model.Email,
-                    Email=model.Email
+                    Email=model.Email,
+                    FirstName=model.FirstName,
+                    LastName=model.LastName
                 };
 
                 // Store user data in AspNetUsers database table
                var result =
                     await _userManager.CreateAsync(user, model.Password);
 
-                // If user is successfully created, sign-in the user using
-                // SignInManager and redirect to index action of HomeController
+				// If the user is signed in and in the Admin role, then it is
+				// the Admin user that is creating a new user. 
+				// So redirect the Admin user to ListUsers action of Administration Controller
 
-                if (result.Succeeded) {
-                
+				if (result.Succeeded) {
+
+                    if (_signInManager.IsSignedIn(User) && User.IsInRole("Admin"))
+                    {
+
+                    return RedirectToAction("ListUsers", "Administration");
+                    }
+
                     await _signInManager.SignInAsync(user, isPersistent: false);
 
                     return RedirectToAction("Index", "Home");
@@ -141,6 +152,40 @@ namespace ASP_NET_Identity.Controllers
         }
 
         //------------------ End-Register ---------------------------
+
+        //------------------ Start-Access Deined --------------------------
+
+        [AllowAnonymous]
+        [HttpGet]
+
+        public async Task<IActionResult> AccessDenied()
+        {
+
+            return View();
+        }
+
+        //------------------ End-Access Deined --------------------------
+
+
+        //------------------ start-validation --------------------------
+        [AllowAnonymous]
+        [HttpPost]
+        [HttpGet]
+        public async Task<IActionResult> IsEmailAvailable(string Email)
+        {
+            //Check If the Email Id is Already in the Database
+            var user = await _userManager.FindByEmailAsync(Email);
+
+            if (user == null)
+            {
+                return Json(true);
+            }
+            else
+            {
+                return Json($"Email {Email} is already in use.");
+            }
+        }
+        //------------------ end-validation --------------------------
 
     }
 }

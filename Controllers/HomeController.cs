@@ -2,42 +2,63 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
-using ASP_NET_Identity.Models;
+using ASP.NET_Identity.Models;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
-namespace ASP_NET_Identity.Controllers
+namespace ASP.NET_Identity.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly UserManager<IdentityUser> _userManager;
-        private readonly RoleManager<IdentityRole> _roleManager;
-        private readonly SignInManager<IdentityUser> _signInManager;
-        public HomeController(UserManager<IdentityUser> userManagerService, RoleManager<IdentityRole> roleManagerService,
-            SignInManager<IdentityUser> signInManagerService)
+        private readonly UserManager<ApplicationUser> _userManager;
+        //private readonly RoleManager<ApplicationUser> _roleManager;
+        private readonly SignInManager<ApplicationUser> _signInManager;
+        public HomeController(UserManager<ApplicationUser> userManagerService,
+            SignInManager<ApplicationUser> signInManagerService)
         {
             _userManager = userManagerService;
-            _roleManager = roleManagerService;
+            //_roleManager = roleManagerService;
             _signInManager = signInManagerService;
         }
 
         [AllowAnonymous]
-        public IActionResult Index()
+
+        public ActionResult Index()
         {
-            return View();
+            //Let’s create list department for dropdownlist
+            List<Department> ListDepartments = new List<Department>()
+            {
+                new Department() {Id = 1, Name="IT" },
+                new Department() {Id = 2, Name="HR" },
+                new Department() {Id = 3, Name="Payroll" },
+            };
+            ViewBag.Departments = ListDepartments;
+            //let’s create one employee
+            Employee emp = new Employee()
+            {
+                EmployeeId = 1,
+                EmployeeName = "Pranaya",
+                Gender = "Male",
+                SelectedDepartmentIDs = new List<int>{ 1, 2, 3 }
+            };
+            //Pass that employee to the view
+            return View(emp);
         }
         [Authorize]
         public IActionResult Privacy()
         {
             return View();
         }
-        [AllowAnonymous]
-        public IActionResult NotSecureMethod()
+        [Authorize(Roles="Admin")]
+        public IActionResult SecureMethod()
         {
 
             return View();
 
         }
-        [Authorize]
-        public IActionResult SecureMethod()
+
+
+        [AllowAnonymous]
+        public IActionResult NotSecureMethod()
         {
 
             return View();
@@ -49,5 +70,7 @@ namespace ASP_NET_Identity.Controllers
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
+
+
     }
 }
